@@ -1,14 +1,27 @@
 import requests
 import configparser
+import time
 import json
 
 query_loc ='''
 {
     last(serviceCodes:[]){
+        address
+        batteryLevel
+        description
+        deviceType
+        id
+        ignition
         latitude
         longitude
+        locationStatus
+        samePlaceMinutes
+        serviceCode
         speed
         town
+        generationDateGMT
+        direction
+        unifiedEventCode
         }
 }
 '''
@@ -26,35 +39,41 @@ except KeyError as error:
 
 param_list = {"client_id": username,  "client_secret": userpass, "grant_type": access_type }
 
+###################################################################################################################
+class ExpiredToken(Exception):
+    "Raised in case invalid token"
+    pass
+
 def login(uri, credentials):
     response = requests.post(uri, data = credentials)
-    return response.json()
-
-def run_query(uri, query, status_code, headers):
-    request=requests.post(uri, json={'query':query}, headers=headers)
-    if request.status_code == status_code:
-        print(request.content)
-        return request.json
+    if response.status_code == 200:
+        content = response.json()
+        token = content['access_token']
+        return token
     else:
-        raise Exception(f"Unexpected status code: {request.content}")
+        raise Exception(f"Unexpected status code: {response.content}")
+
+def run_query(uri, query, headers):
+    response=requests.post(uri, json={'query':query}, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise ExpiredToken
+###################################################################################################################
 
 get_token = login(url_token, param_list)
+header_token={"Authorization":"Bearer " + get_token}
 
-token = get_token['access_token']
-header={"Authorization":"Bearer " + token}
-
-get_loc = run_query(url_loc, query_loc, 200, header)
-
-#print(get_loc)
-
-#print("url: " + url)
-#response= requests.post(url_token, data= param_list)
-#print("status code: " + str(response.status_code))
-
-
+while True:
+    try:
+        get_loc = run_query(url_loc, query_loc,  header_token)
+        print(get_loc)
+        time.sleep(10)
+    except ExpiredToken:
+        get_token = login(url_token, param_list)
+        header_token={"Authorization":"Bearer " + get_token}
+        
 
 
-#print(response.content)
- 
 
 
