@@ -37,11 +37,9 @@ for v in event:
         "holder_domain": str(v["serviceCode"])
         },)
     id_count+=1
-
-
-
    
 print(json.dumps(quad_json))
+
 
 
         
