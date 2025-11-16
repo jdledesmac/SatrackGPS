@@ -3,7 +3,6 @@ import requests
 import configparser
 import time
 from datetime import datetime
-import json
 import os
 
 class ExpiredToken(Exception):
@@ -52,10 +51,12 @@ except KeyError as error:
 
 param_list = {"client_id": username,  "client_secret": userpass, "grant_type": access_type }
 
-print("Integración APIs Satrack-Quadminds V1.0")
+print("Integración API Quadminds V1.0")
+print(f"Cliente: {client_quad}")
 while True:
-    text = input("Presione Enter para iniciar monitoreo: ")
+    text = input("-> Presione Enter para iniciar monitoreo, 'Ctrl + C' o cierre ventana para interrumpir")
     if text == "":
+        print(end="\n") 
         break
     else:
         time.sleep(1)
@@ -81,7 +82,7 @@ def login(uri, credentials):
     if response.status_code == 200:
         content = response.json()
         token = content['access_token']
-        print(f"-> {now}: Obtenido Token de acceso a Satrack exitosamente")
+        #print(f"-> {now}: Obtenido Token de acceso a Satrack exitosamente")
         return token
     else:
         raise Exception(f"-> {now}: API-Satrack, Codigo de Estatus inesperado: {response.content}")
@@ -102,9 +103,9 @@ def run_quad(url, payload, headers):
     response = requests.post(url, json=payload, headers=headers)
     status = response.json()
     if status["status"] == 'ok':
-        print(end='\x1b[2K')
+        #print(end='\x1b[2K')
         print(f"-> {now}: Monitoreando...", end="\r")
-    else:    
+    else:
         print(f"-> {now}: API-Quadminds, Estatus inesperado: {response.content}")
         
 
