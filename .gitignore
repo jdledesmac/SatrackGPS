@@ -5,3 +5,5 @@ quads.json
 modify_data.py
 /output
 sqMonitor.rar
+*.pdf
+__pycache__/
